@@ -38,7 +38,7 @@ document.getElementById('btns').addEventListener('click',function(e){
   var c=b.getAttribute('data-c');
   switch(c){
     case 'run':
-      send('source ~/.kimchi_env 2>/dev/null; kimchi');break;
+      send('export PATH="$HOME/.local/bin:$HOME/.kimchi/bin:$HOME/.kimchi:$HOME/bin:/usr/local/bin:$PATH" && source ~/.kimchi_env 2>/dev/null && kimchi');break;
     case 'yes': send('yes');break;
     case 'no': send('no');break;
     case '1': send('1');break;
@@ -50,10 +50,10 @@ document.getElementById('btns').addEventListener('click',function(e){
       var f=prompt('Deskripsikan tugas untuk Ferment:');
       if(f&&f.trim())send('/ferment '+f.trim());break;
     case 'install':
-      send('curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash');break;
+      send('curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash && export PATH="$HOME/.local/bin:$HOME/.kimchi/bin:$HOME/.kimchi:$HOME/bin:/usr/local/bin:$PATH" && echo "export PATH=$HOME/.local/bin:$HOME/.kimchi/bin:$HOME/.kimchi:$HOME/bin:/usr/local/bin:$PATH" >> ~/.bashrc && hash -r && which kimchi && kimchi --version');break;
     case 'key':
       var k=prompt('Paste API Key dari app.kimchi.dev:');
-      if(k&&k.trim())send('export KIMCHI_API_KEY="'+k.trim()+'" && echo KIMCHI_API_KEY='+k.trim()+' > ~/.kimchi_env && echo OK');break;
+      if(k&&k.trim())send('export KIMCHI_API_KEY="'+k.trim()+'" && echo KIMCHI_API_KEY='+k.trim()+' > ~/.kimchi_env && echo "export KIMCHI_API_KEY='+k.trim()+'" >> ~/.bashrc && echo OK');break;
     case 'clear': term.clear();term.focus();break;
   }
 });

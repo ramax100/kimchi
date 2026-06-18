@@ -19,7 +19,8 @@ app.ws('/ws', (ws) => {
     env: Object.assign({}, process.env, {
       TERM: 'xterm-256color',
       BROWSER: 'none',
-      PATH: home + '/.local/bin:' + home + '/.kimchi/bin:/usr/local/bin:' + (process.env.PATH || '')
+      HOME: home,
+      PATH: home + '/.local/bin:' + home + '/.kimchi/bin:' + home + '/.kimchi:' + home + '/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || '')
     })
   });
 
