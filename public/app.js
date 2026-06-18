@@ -134,7 +134,19 @@
     var btn = e.target.closest('button');
     if (!btn) return;
     var cmd = btn.getAttribute('data-cmd');
-    if (cmd && ws && ws.readyState === WebSocket.OPEN) {
+    if (!cmd) return;
+    
+    // Special handling for API key button - prompt user
+    if (cmd.indexOf('KIMCHI_API_KEY') !== -1) {
+      var key = prompt('Paste API Key dari app.kimchi.dev/settings:');
+      if (key && key.trim()) {
+        cmd = 'export KIMCHI_API_KEY="' + key.trim() + '"';
+      } else {
+        return;
+      }
+    }
+    
+    if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({ type: 'input', data: cmd + '\r' }));
       term.focus();
     }
