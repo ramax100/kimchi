@@ -1,0 +1,17 @@
+{
+  "name": "kimchi-terminal",
+  "version": "1.0.0",
+  "description": "Web-based terminal emulator - real shell in your browser",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-ws": "^5.0.2",
+    "node-pty": "^1.0.0"
+  }
+}

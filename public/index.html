@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kimchi Terminal</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d0d0d;color:#e0e0e0;height:100vh;font-family:'JetBrains Mono','Fira Code',monospace;display:flex;flex-direction:column;overflow:hidden}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a2e;border-bottom:1px solid #2d2d4a}
+.header-left{display:flex;align-items:center;gap:8px}
+.logo-icon{font-size:20px}
+.logo-text{font-size:14px;font-weight:700;background:linear-gradient(135deg,#c850c0,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.status{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;transition:all .3s}
+.status.connecting{background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d}
+.status.connected{background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);color:#4ecdc4}
+.status.disconnected{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#terminal-container{flex:1;padding:4px}
+#terminal-container .xterm{height:100%}
+.footer{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 16px;background:#1a1a2e;border-top:1px solid #2d2d4a;font-size:11px;color:#5a6380}
+.footer b{color:#4ecdc4}
+</style>
+</head>
+<body>
+<header class="header">
+<div class="header-left">
+<span class="logo-icon">&#x1F96C;</span>
+<span class="logo-text">Kimchi Terminal</span>
+</div>
+<div class="status connecting" id="status">
+<span class="dot"></span>
+<span id="status-text">Connecting...</span>
+</div>
+</header>
+<div id="terminal-container"></div>
+<footer class="footer">
+<span>Kimchi Terminal v1.0.0</span>
+<span>|</span>
+<span>Real shell via <b>WebSocket</b></span>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
