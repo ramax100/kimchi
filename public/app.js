@@ -55,6 +55,21 @@
   term.open(container);
   fitAddon.fit();
 
+  // Refit when visual viewport changes (mobile keyboard open/close)
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function() {
+      fitAddon.fit();
+    });
+  }
+
+  // ResizeObserver for container size changes
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(function() {
+      fitAddon.fit();
+    });
+    ro.observe(container);
+  }
+
   // WebSocket connection
   var ws;
   var reconnectAttempts = 0;

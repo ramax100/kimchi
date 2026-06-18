@@ -14,6 +14,8 @@ body{
   font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
   display:flex;
   flex-direction:column;
+  height:100vh;
+  height:100dvh;
 }
 
 /* Header */
@@ -59,11 +61,11 @@ body{
 /* Terminal */
 #terminal-container{
   flex:1;
+  min-height:0;
   overflow:hidden;
   position:relative;
   background:#0a0a0f;
   border-left:3px solid rgba(200,80,192,0.15);
-  margin:0;
 }
 #terminal-container .xterm{
   height:100%;
