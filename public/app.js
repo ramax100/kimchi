@@ -140,8 +140,7 @@
     if (cmd === 'set-key') {
       var key = prompt('Paste API Key dari app.kimchi.dev/settings :');
       if (key && key.trim()) {
-        // Set both KIMCHI_API_KEY and write to .env file for persistence
-        var commands = 'export KIMCHI_API_KEY="' + key.trim() + '" && echo "KIMCHI_API_KEY=' + key.trim() + '" > ~/.kimchi_env && echo "✅ API Key set!"';
+        var commands = 'export KIMCHI_API_KEY="' + key.trim() + '" && echo "KIMCHI_API_KEY=' + key.trim() + '" > ~/.kimchi_env && echo "✅ API Key saved!"';
         ws.send(JSON.stringify({ type: 'input', data: commands + '\r' }));
       }
       term.focus();
@@ -152,6 +151,16 @@
     if (cmd === 'run-kimchi') {
       var runCmd = 'source ~/.kimchi_env 2>/dev/null; export BROWSER=none; export CI=true; export KIMCHI_NON_INTERACTIVE=1; kimchi';
       ws.send(JSON.stringify({ type: 'input', data: runCmd + '\r' }));
+      term.focus();
+      return;
+    }
+    
+    // Special handling for prompt/task button
+    if (cmd === 'prompt-task') {
+      var task = prompt('Ketik perintah untuk Kimchi agent:');
+      if (task && task.trim()) {
+        ws.send(JSON.stringify({ type: 'input', data: task.trim() + '\r' }));
+      }
       term.focus();
       return;
     }
