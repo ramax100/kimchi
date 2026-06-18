@@ -27,6 +27,7 @@ body{background:var(--bg);color:var(--text);height:100vh;font-family:'JetBrains 
 <body>
 <header class="header"><div class="header-left"><span class="logo-icon">&#x1F96C;</span><span class="logo-text">Kimchi Terminal</span></div><div class="status"><span class="dot"></span><span>Ready</span></div></header>
 <div class="terminal" id="terminal" tabindex="0"></div>
+<textarea id="hiddenInput" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" style="position:fixed;top:-9999px;left:-9999px;opacity:0;width:1px;height:1px;"></textarea>
 <footer class="footer"><span>Kimchi Terminal v1.0.0</span><span class="sep">|</span><span>Type <b>help</b> for commands</span></footer>
 <script src="app.js"></script>
 </body>
