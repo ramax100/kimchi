@@ -136,14 +136,24 @@
     var cmd = btn.getAttribute('data-cmd');
     if (!cmd) return;
     
-    // Special handling for API key button - prompt user
-    if (cmd.indexOf('KIMCHI_API_KEY') !== -1) {
-      var key = prompt('Paste API Key dari app.kimchi.dev/settings:');
+    // Special handling for API key button
+    if (cmd === 'set-key') {
+      var key = prompt('Paste API Key dari app.kimchi.dev/settings :');
       if (key && key.trim()) {
-        cmd = 'export KIMCHI_API_KEY="' + key.trim() + '"';
-      } else {
-        return;
+        // Set both KIMCHI_API_KEY and write to .env file for persistence
+        var commands = 'export KIMCHI_API_KEY="' + key.trim() + '" && echo "KIMCHI_API_KEY=' + key.trim() + '" > ~/.kimchi_env && echo "✅ API Key set!"';
+        ws.send(JSON.stringify({ type: 'input', data: commands + '\r' }));
       }
+      term.focus();
+      return;
+    }
+    
+    // Special handling for Run Kimchi - load env first
+    if (cmd === 'run-kimchi') {
+      var runCmd = 'source ~/.kimchi_env 2>/dev/null; export BROWSER=none; export CI=true; export KIMCHI_NON_INTERACTIVE=1; kimchi';
+      ws.send(JSON.stringify({ type: 'input', data: runCmd + '\r' }));
+      term.focus();
+      return;
     }
     
     if (ws && ws.readyState === WebSocket.OPEN) {
