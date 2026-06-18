@@ -4,7 +4,7 @@
   "description": "Web terminal for Kimchi Coding agent",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install"
+    "build": "apt-get update && apt-get install -y make gcc g++ python3 || true && npm install"
   },
   "engines": {
     "node": ">=18"
