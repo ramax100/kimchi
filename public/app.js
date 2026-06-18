@@ -3,14 +3,17 @@
 
   var statusEl = document.getElementById('status');
   var statusText = document.getElementById('status-text');
+  var tapHint = document.getElementById('tap-hint');
+  var quickCmds = document.getElementById('quick-cmds');
 
-  // Create terminal
+  // Create terminal with mobile-friendly settings
   var term = new Terminal({
     cursorBlink: true,
     cursorStyle: 'bar',
     fontSize: 14,
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace",
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
     lineHeight: 1.3,
+    allowTransparency: true,
     theme: {
       background: '#0d0d0d',
       foreground: '#e0e0e0',
@@ -34,7 +37,8 @@
       brightCyan: '#80deea',
       brightWhite: '#ffffff'
     },
-    scrollback: 5000
+    scrollback: 5000,
+    convertEol: true
   });
 
   var fitAddon = new FitAddon.FitAddon();
@@ -49,7 +53,8 @@
   // WebSocket connection
   var ws;
   var reconnectAttempts = 0;
-  var maxReconnect = 5;
+  var maxReconnect = 10;
+  var connected = false;
 
   function setStatus(state, text) {
     statusEl.className = 'status ' + state;
@@ -66,9 +71,12 @@
     ws.onopen = function() {
       setStatus('connected', 'Connected');
       reconnectAttempts = 0;
+      connected = true;
+      tapHint.classList.remove('show');
       // Send initial size
       ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
-      term.focus();
+      // Focus terminal
+      setTimeout(function() { term.focus(); }, 200);
     };
 
     ws.onmessage = function(e) {
@@ -76,15 +84,18 @@
     };
 
     ws.onclose = function() {
-      setStatus('disconnected', 'Disconnected');
+      connected = false;
+      setStatus('disconnected', 'Disconnected - reconnecting...');
       if (reconnectAttempts < maxReconnect) {
         reconnectAttempts++;
         setTimeout(connect, 2000);
+      } else {
+        setStatus('disconnected', 'Disconnected');
       }
     };
 
     ws.onerror = function() {
-      setStatus('disconnected', 'Error');
+      connected = false;
     };
   }
 
@@ -102,9 +113,39 @@
     }
   });
 
+  // Responsive resize
   window.addEventListener('resize', function() {
     fitAddon.fit();
   });
+
+  // Focus on any click/tap on terminal area
+  container.addEventListener('click', function() {
+    term.focus();
+    tapHint.classList.remove('show');
+  });
+
+  container.addEventListener('touchstart', function() {
+    term.focus();
+    tapHint.classList.remove('show');
+  });
+
+  // Quick command buttons
+  quickCmds.addEventListener('click', function(e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var cmd = btn.getAttribute('data-cmd');
+    if (cmd && ws && ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'input', data: cmd + '\r' }));
+      term.focus();
+    }
+  });
+
+  // Show tap hint after a delay if not focused
+  setTimeout(function() {
+    if (connected && document.activeElement !== term.textarea) {
+      tapHint.classList.add('show');
+    }
+  }, 3000);
 
   // Start connection
   connect();

@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Kimchi Terminal</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d0d0d;color:#e0e0e0;height:100vh;font-family:'JetBrains Mono','Fira Code',monospace;display:flex;flex-direction:column;overflow:hidden}
-.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a2e;border-bottom:1px solid #2d2d4a}
+html,body{height:100%;overflow:hidden}
+body{background:#0d0d0d;color:#e0e0e0;font-family:'JetBrains Mono','Fira Code',monospace;display:flex;flex-direction:column}
+.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a2e;border-bottom:1px solid #2d2d4a;flex-shrink:0}
 .header-left{display:flex;align-items:center;gap:8px}
 .logo-icon{font-size:20px}
 .logo-text{font-size:14px;font-weight:700;background:linear-gradient(135deg,#c850c0,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -18,10 +19,15 @@ body{background:#0d0d0d;color:#e0e0e0;height:100vh;font-family:'JetBrains Mono',
 .status.disconnected{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b}
 .dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#terminal-container{flex:1;padding:4px}
-#terminal-container .xterm{height:100%}
-.footer{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 16px;background:#1a1a2e;border-top:1px solid #2d2d4a;font-size:11px;color:#5a6380}
+#terminal-container{flex:1;overflow:hidden;position:relative}
+#terminal-container .xterm{height:100%;padding:4px}
+.quick-cmds{display:flex;gap:6px;padding:8px 12px;background:#1a1a2e;border-top:1px solid #2d2d4a;overflow-x:auto;flex-shrink:0}
+.quick-cmds button{background:#2d2d4a;color:#4ecdc4;border:1px solid #3d3d5a;border-radius:6px;padding:6px 12px;font-size:11px;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .2s}
+.quick-cmds button:hover,.quick-cmds button:active{background:#c850c0;color:#fff;border-color:#c850c0}
+.footer{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 16px;background:#1a1a2e;border-top:1px solid #2d2d4a;font-size:10px;color:#5a6380;flex-shrink:0}
 .footer b{color:#4ecdc4}
+.tap-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(200,80,192,0.15);border:1px solid rgba(200,80,192,0.4);border-radius:12px;padding:16px 24px;text-align:center;color:#c850c0;font-size:13px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
+.tap-hint.show{opacity:1}
 </style>
 </head>
 <body>
@@ -35,11 +41,20 @@ body{background:#0d0d0d;color:#e0e0e0;height:100vh;font-family:'JetBrains Mono',
 <span id="status-text">Connecting...</span>
 </div>
 </header>
-<div id="terminal-container"></div>
+<div id="terminal-container">
+<div class="tap-hint" id="tap-hint">Tap di sini untuk mulai mengetik</div>
+</div>
+<div class="quick-cmds" id="quick-cmds">
+<button data-cmd="help-kimchi.sh">📖 Panduan</button>
+<button data-cmd="kimchi">🥬 Kimchi</button>
+<button data-cmd="ls">📂 ls</button>
+<button data-cmd="clear">🧹 clear</button>
+<button data-cmd="curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash">⬇️ Install</button>
+</div>
 <footer class="footer">
 <span>Kimchi Terminal v1.0.0</span>
 <span>|</span>
-<span>Real shell via <b>WebSocket</b></span>
+<span>Tap terminal untuk ketik | Tombol di bawah untuk shortcut</span>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
