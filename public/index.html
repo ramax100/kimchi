@@ -8,62 +8,223 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
-body{background:#0d0d0d;color:#e0e0e0;font-family:'JetBrains Mono','Fira Code',monospace;display:flex;flex-direction:column}
-.header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1a1a2e;border-bottom:1px solid #2d2d4a;flex-shrink:0}
-.header-left{display:flex;align-items:center;gap:8px}
-.logo-icon{font-size:20px}
-.logo-text{font-size:14px;font-weight:700;background:linear-gradient(135deg,#c850c0,#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.status{display:flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;transition:all .3s}
-.status.connecting{background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:#ffd93d}
-.status.connected{background:rgba(78,205,196,.1);border:1px solid rgba(78,205,196,.3);color:#4ecdc4}
-.status.disconnected{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);color:#ff6b6b}
-.dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#terminal-container{flex:1;overflow:hidden;position:relative}
-#terminal-container .xterm{height:100%;padding:4px}
-.quick-cmds{display:flex;gap:6px;padding:8px 12px;background:#1a1a2e;border-top:1px solid #2d2d4a;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
-.quick-cmds::-webkit-scrollbar{height:0;display:none}
-.quick-cmds button{background:#2d2d4a;color:#4ecdc4;border:1px solid #3d3d5a;border-radius:6px;padding:8px 14px;font-size:12px;font-family:inherit;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0}
-.quick-cmds button:hover,.quick-cmds button:active{background:#c850c0;color:#fff;border-color:#c850c0;transform:scale(0.95)}
-.footer{display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 16px;background:#1a1a2e;border-top:1px solid #2d2d4a;font-size:10px;color:#5a6380;flex-shrink:0}
-.footer b{color:#4ecdc4}
-.tap-hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(200,80,192,0.15);border:1px solid rgba(200,80,192,0.4);border-radius:12px;padding:16px 24px;text-align:center;color:#c850c0;font-size:13px;pointer-events:none;opacity:0;transition:opacity .3s;z-index:10}
+body{
+  background:#0a0a0f;
+  color:#e0e0e0;
+  font-family:-apple-system,'Segoe UI',Roboto,sans-serif;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Header */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 20px;
+  background:linear-gradient(135deg,#12121a,#1a1a2e);
+  border-bottom:1px solid rgba(200,80,192,0.2);
+  flex-shrink:0;
+}
+.header-left{display:flex;align-items:center;gap:10px}
+.logo-icon{font-size:24px;filter:drop-shadow(0 0 8px rgba(78,205,196,0.4))}
+.logo-text{
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#c850c0,#ff6b6b,#ffd93d);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-size:200% 200%;
+  animation:gradient 3s ease infinite;
+}
+@keyframes gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 14px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:500;
+  transition:all .3s;
+  backdrop-filter:blur(8px);
+}
+.status.connecting{background:rgba(255,217,61,.08);border:1px solid rgba(255,217,61,.25);color:#ffd93d}
+.status.connected{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.25);color:#4ecdc4}
+.status.disconnected{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);color:#ff6b6b}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.85)}}
+
+/* Terminal */
+#terminal-container{
+  flex:1;
+  overflow:hidden;
+  position:relative;
+  background:#0a0a0f;
+  border-left:3px solid rgba(200,80,192,0.15);
+  margin:0;
+}
+#terminal-container .xterm{
+  height:100%;
+  padding:8px 4px 8px 12px;
+}
+
+/* Quick Commands */
+.quick-cmds{
+  display:flex;
+  gap:8px;
+  padding:12px 16px;
+  background:linear-gradient(135deg,#12121a,#1a1a2e);
+  border-top:1px solid rgba(200,80,192,0.15);
+  overflow-x:auto;
+  flex-shrink:0;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.quick-cmds::-webkit-scrollbar{display:none}
+.quick-cmds button{
+  background:rgba(45,45,74,0.6);
+  color:#b8b8d0;
+  border:1px solid rgba(78,205,196,0.2);
+  border-radius:10px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:500;
+  font-family:inherit;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all .2s ease;
+  flex-shrink:0;
+  backdrop-filter:blur(4px);
+}
+.quick-cmds button:hover{
+  background:rgba(200,80,192,0.15);
+  color:#fff;
+  border-color:rgba(200,80,192,0.5);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(200,80,192,0.2);
+}
+.quick-cmds button:active{
+  transform:translateY(0) scale(0.96);
+  background:rgba(200,80,192,0.25);
+}
+.quick-cmds button.primary{
+  background:rgba(78,205,196,0.12);
+  color:#4ecdc4;
+  border-color:rgba(78,205,196,0.35);
+}
+.quick-cmds button.primary:hover{
+  background:rgba(78,205,196,0.25);
+  border-color:#4ecdc4;
+  box-shadow:0 4px 12px rgba(78,205,196,0.2);
+}
+.quick-cmds button.action{
+  background:rgba(200,80,192,0.1);
+  color:#ea80fc;
+  border-color:rgba(200,80,192,0.3);
+}
+.quick-cmds button.action:hover{
+  background:rgba(200,80,192,0.25);
+  border-color:#c850c0;
+  box-shadow:0 4px 12px rgba(200,80,192,0.25);
+}
+.quick-cmds button.answer{
+  background:rgba(255,217,61,0.08);
+  color:#ffd93d;
+  border-color:rgba(255,217,61,0.25);
+  padding:10px 20px;
+}
+.quick-cmds button.answer:hover{
+  background:rgba(255,217,61,0.2);
+  border-color:#ffd93d;
+}
+
+/* Footer */
+.footer{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  padding:8px 16px;
+  background:#0a0a0f;
+  border-top:1px solid rgba(45,45,74,0.5);
+  font-size:11px;
+  color:#5a6380;
+  flex-shrink:0;
+}
+.footer span.sep{color:rgba(200,80,192,0.3)}
+.footer b{color:#4ecdc4;font-weight:600}
+
+/* Tap hint */
+.tap-hint{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(10,10,15,0.9);
+  border:1px solid rgba(200,80,192,0.4);
+  border-radius:16px;
+  padding:20px 32px;
+  text-align:center;
+  color:#c850c0;
+  font-size:14px;
+  font-weight:500;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .4s;
+  z-index:10;
+  backdrop-filter:blur(8px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);
+}
 .tap-hint.show{opacity:1}
+
+/* Scrollbar for terminal */
+.xterm-viewport::-webkit-scrollbar{width:6px}
+.xterm-viewport::-webkit-scrollbar-track{background:transparent}
+.xterm-viewport::-webkit-scrollbar-thumb{background:rgba(200,80,192,0.3);border-radius:3px}
+.xterm-viewport::-webkit-scrollbar-thumb:hover{background:rgba(200,80,192,0.5)}
 </style>
 </head>
 <body>
+
 <header class="header">
-<div class="header-left">
-<span class="logo-icon">&#x1F96C;</span>
-<span class="logo-text">Kimchi Terminal</span>
-</div>
-<div class="status connecting" id="status">
-<span class="dot"></span>
-<span id="status-text">Connecting...</span>
-</div>
+  <div class="header-left">
+    <span class="logo-icon">🥬</span>
+    <span class="logo-text">Kimchi Terminal</span>
+  </div>
+  <div class="status connecting" id="status">
+    <span class="dot"></span>
+    <span id="status-text">Connecting...</span>
+  </div>
 </header>
+
 <div id="terminal-container">
-<div class="tap-hint" id="tap-hint">Tap di sini untuk mulai mengetik</div>
+  <div class="tap-hint" id="tap-hint">👆 Tap di sini untuk mulai mengetik</div>
 </div>
+
 <div class="quick-cmds" id="quick-cmds">
-<button data-cmd="help-kimchi.sh">📖 Panduan</button>
-<button data-cmd="curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash">⬇️ Install</button>
-<button data-cmd="set-key">🔑 API Key</button>
-<button data-cmd="run-kimchi">🥬 Kimchi</button>
-<button data-cmd="yes">✅ Yes</button>
-<button data-cmd="no">❌ No</button>
-<button data-cmd="1">1️⃣</button>
-<button data-cmd="2">2️⃣</button>
-<button data-cmd="prompt-task">💬 Perintah</button>
-<button data-cmd="/ferment ">🧪 Ferment</button>
-<button data-cmd="/help">❓ /help</button>
-<button data-cmd="clear">🧹 Clear</button>
+  <button class="primary" data-cmd="run-kimchi">🥬 Kimchi</button>
+  <button class="answer" data-cmd="yes">✅ Yes</button>
+  <button class="answer" data-cmd="no">❌ No</button>
+  <button class="answer" data-cmd="1">1️⃣</button>
+  <button class="answer" data-cmd="2">2️⃣</button>
+  <button class="action" data-cmd="prompt-task">💬 Perintah</button>
+  <button class="action" data-cmd="/ferment ">🧪 Ferment</button>
+  <button data-cmd="curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash">⬇️ Install</button>
+  <button data-cmd="set-key">🔑 API Key</button>
+  <button data-cmd="/help">❓ Help</button>
+  <button data-cmd="clear">🧹 Clear</button>
+  <button data-cmd="help-kimchi.sh">📖 Guide</button>
 </div>
+
 <footer class="footer">
-<span>Kimchi Terminal v1.0.0</span>
-<span>|</span>
-<span>Tap terminal untuk ketik | Scroll tombol untuk shortcut</span>
+  <span>Kimchi Terminal</span>
+  <span class="sep">•</span>
+  <span>Scroll tombol → untuk semua shortcut</span>
+  <span class="sep">•</span>
+  <span>Real <b>Linux Shell</b></span>
 </footer>
+
 <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.min.js"></script>

@@ -6,38 +6,43 @@
   var tapHint = document.getElementById('tap-hint');
   var quickCmds = document.getElementById('quick-cmds');
 
-  // Create terminal with mobile-friendly settings
+  // Create terminal with comfortable settings
   var term = new Terminal({
     cursorBlink: true,
     cursorStyle: 'bar',
-    fontSize: 14,
-    fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
-    lineHeight: 1.3,
+    cursorWidth: 2,
+    fontSize: 15,
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', 'Courier New', monospace",
+    fontWeight: '400',
+    fontWeightBold: '600',
+    lineHeight: 1.4,
+    letterSpacing: 0.5,
     allowTransparency: true,
     theme: {
-      background: '#0d0d0d',
-      foreground: '#e0e0e0',
+      background: '#0a0a0f',
+      foreground: '#d4d4dc',
       cursor: '#c850c0',
-      cursorAccent: '#0d0d0d',
-      selectionBackground: 'rgba(200, 80, 192, 0.3)',
-      black: '#1a1a2e',
+      cursorAccent: '#0a0a0f',
+      selectionBackground: 'rgba(200, 80, 192, 0.25)',
+      selectionForeground: '#ffffff',
+      black: '#1e1e2e',
       red: '#ff6b6b',
       green: '#4ecdc4',
       yellow: '#ffd93d',
-      blue: '#6c63ff',
+      blue: '#7c8cff',
       magenta: '#c850c0',
       cyan: '#45b7d1',
-      white: '#e0e0e0',
-      brightBlack: '#5a6380',
+      white: '#d4d4dc',
+      brightBlack: '#6a6a8a',
       brightRed: '#ff8787',
       brightGreen: '#69f0ae',
       brightYellow: '#fff176',
-      brightBlue: '#8c9eff',
+      brightBlue: '#a5b4fc',
       brightMagenta: '#ea80fc',
       brightCyan: '#80deea',
       brightWhite: '#ffffff'
     },
-    scrollback: 5000,
+    scrollback: 10000,
     convertEol: true
   });
 
