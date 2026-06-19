@@ -38,6 +38,7 @@ document.getElementById('btns').addEventListener('click',function(e){
     case'ferment':var f=prompt('Tugas:');if(f)send('/ferment '+f+'\r');break;
     case'key':var k=prompt('API Key:');if(k)send('export KIMCHI_API_KEY="'+k.trim()+'"\r');break;
     case'install':send('which kimchi && kimchi --version\r');break;
+    case'debug':send('echo "=== DEBUG ===" && echo "PATH: $PATH" && echo "HOME: $HOME" && which kimchi 2>&1 && ls -la $HOME/.local/bin/ 2>&1 && ls -la $HOME/.kimchi/ 2>&1 && find / -name kimchi -type f 2>/dev/null && echo "=== END ==="\r');break;
     case'clear':term.clear();break;
   }
 });
