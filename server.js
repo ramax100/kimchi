@@ -1,42 +1,44 @@
 const express = require('express');
+const expressWs = require('express-ws');
+const pty = require('node-pty');
 const path = require('path');
+const os = require('os');
 
 const app = express();
-app.use(express.json());
+expressWs(app);
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/api/chat', async (req, res) => {
-  const { messages, apiKey, baseUrl, model } = req.body;
+const HOME = os.homedir();
 
-  if (!apiKey) return res.status(400).json({ error: 'API key required' });
+app.ws('/ws', (ws) => {
+  const shell = process.env.SHELL || '/bin/bash';
 
-  const url = (baseUrl || 'https://api.kimchi.dev/v1') + '/chat/completions';
+  const term = pty.spawn(shell, ['--login'], {
+    name: 'xterm-256color',
+    cols: 80,
+    rows: 24,
+    cwd: HOME,
+    env: Object.assign({}, process.env, {
+      TERM: 'xterm-256color',
+      HOME: HOME,
+      BROWSER: 'none',
+      PATH: HOME + '/.local/bin:' + HOME + '/.kimchi/bin:' + HOME + '/.kimchi:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || '')
+    })
+  });
 
-  try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + apiKey
-      },
-      body: JSON.stringify({
-        model: model || 'gpt-4o-mini',
-        messages: messages,
-        stream: false
-      })
-    });
+  term.onData(d => { try { ws.send(d); } catch(e){} });
+  term.onExit(() => { try { ws.close(); } catch(e){} });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({ error: errText });
-    }
+  ws.on('message', msg => {
+    try {
+      const m = JSON.parse(msg);
+      if (m.type === 'resize') term.resize(m.cols, m.rows);
+      else if (m.type === 'input') term.write(m.data);
+    } catch(e) { term.write(msg); }
+  });
 
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: 'Gagal koneksi ke ' + url + ': ' + err.message });
-  }
+  ws.on('close', () => term.kill());
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log('http://localhost:' + PORT));
+app.listen(PORT, '0.0.0.0', () => console.log('Running on port ' + PORT));

@@ -1,14 +1,14 @@
 {
-  "name": "kimchi-chat",
-  "version": "3.0.0",
-  "description": "Kimchi AI Chat - coding agent in your browser",
+  "name": "kimchi-terminal",
+  "version": "4.0.0",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "bash install-kimchi.sh || true"
   },
-  "engines": {
-    "node": ">=18"
-  },
+  "engines": { "node": ">=18" },
   "dependencies": {
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "express-ws": "^5.0.2",
+    "node-pty": "^1.0.0"
   }
 }

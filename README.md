@@ -1,21 +1,24 @@
-# Kimchi AI Chat
+# Kimchi Terminal
 
-Chat langsung dengan Kimchi AI di browser. Tidak perlu install apa-apa.
+Web terminal untuk Kimchi CLI coding agent. Sama persis seperti pakai di terminal lokal.
 
-## Deploy di Render (Gratis)
+## Deploy (Render.com - Gratis)
 
-1. render.com → New → Web Service → repo `ramax100/kimchi`
-2. Build: `npm install` | Start: `npm start` | Instance: Free
-3. Selesai!
+1. render.com → New → Web Service → repo ini
+2. Build: `npm install`
+3. Start: `npm start`
+4. Instance: Free
 
 ## Cara Pakai
 
 1. Buka website
-2. Paste API Key dari app.kimchi.dev/settings
-3. Ketik perintah, Kimchi jawab!
+2. Tap 🔑 API Key → paste key dari app.kimchi.dev
+3. Tap 🥬 kimchi → agent jalan
+4. Ikuti prompt (Yes/No/1/2) pakai tombol
+5. Tap 💬 Perintah → ketik tugas coding
 
 ## Lokal
 
-```bash
+```
 npm install && npm start
 ```
