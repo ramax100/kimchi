@@ -1,43 +1,41 @@
 const express = require('express');
-const expressWs = require('express-ws');
-const pty = require('node-pty');
 const path = require('path');
 
 const app = express();
-expressWs(app);
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.ws('/ws', (ws) => {
-  const shell = process.env.SHELL || '/bin/bash';
-  const home = process.env.HOME || '/root';
+app.post('/api/chat', async (req, res) => {
+  const { messages, apiKey } = req.body;
 
-  const term = pty.spawn(shell, ['--login'], {
-    name: 'xterm-256color',
-    cols: 80,
-    rows: 24,
-    cwd: home,
-    env: Object.assign({}, process.env, {
-      TERM: 'xterm-256color',
-      BROWSER: 'none',
-      HOME: home,
-      PATH: home + '/.local/bin:' + home + '/.kimchi/bin:' + home + '/.kimchi:' + home + '/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || '')
-    })
-  });
+  if (!apiKey) {
+    return res.status(400).json({ error: 'API key required' });
+  }
 
-  term.onData((data) => { try { ws.send(data); } catch(e) {} });
-  term.onExit(() => { try { ws.close(); } catch(e) {} });
+  try {
+    const response = await fetch('https://api.kimchi.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'kimchi-coder-v2',
+        messages: messages,
+        stream: false
+      })
+    });
 
-  ws.on('message', (msg) => {
-    try {
-      const m = JSON.parse(msg);
-      if (m.type === 'resize') term.resize(m.cols, m.rows);
-      else if (m.type === 'input') term.write(m.data);
-    } catch(e) {
-      term.write(msg);
+    if (!response.ok) {
+      const errText = await response.text();
+      return res.status(response.status).json({ error: errText });
     }
-  });
 
-  ws.on('close', () => term.kill());
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 const PORT = process.env.PORT || 3000;

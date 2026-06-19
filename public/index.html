@@ -2,66 +2,73 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Kimchi Terminal</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Kimchi AI Chat</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;height:100dvh;overflow:hidden;background:#0c0c14}
-body{display:flex;flex-direction:column;font-family:system-ui,sans-serif}
+body{display:flex;flex-direction:column;font-family:system-ui,-apple-system,sans-serif;color:#e0e0e0}
 
-.bar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px;background:#14141f;border-bottom:1px solid #252540;flex-shrink:0;
-}
-.bar .logo{font-size:15px;font-weight:700;color:#fff}
-.bar .logo span{color:#c850c0}
-.bar .dot{width:8px;height:8px;border-radius:50%;background:#555}
-.bar .dot.on{background:#4ecdc4;box-shadow:0 0 6px #4ecdc4}
+.header{padding:14px 20px;background:#14141f;border-bottom:1px solid #252540;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.header .logo{font-size:16px;font-weight:700;color:#fff}
+.header .logo span{color:#c850c0}
+.header button{background:#1e1e2e;color:#4ecdc4;border:1px solid #4ecdc455;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer}
+.header button:hover{background:#4ecdc4;color:#0c0c14}
 
-#term{flex:1;min-height:0;overflow:hidden}
+.key-bar{padding:10px 20px;background:#14141f;border-bottom:1px solid #252540;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.key-bar input{flex:1;background:#1e1e2e;border:1px solid #333;border-radius:8px;padding:10px 14px;color:#fff;font-size:13px;outline:none}
+.key-bar input:focus{border-color:#c850c0}
+.key-bar input::placeholder{color:#666}
 
-.btns{
-  display:flex;gap:6px;padding:10px 12px;
-  background:#14141f;border-top:1px solid #252540;
-  overflow-x:auto;flex-shrink:0;
-}
-.btns::-webkit-scrollbar{display:none}
-.btns button{
-  padding:9px 14px;border-radius:8px;border:1px solid #333;
-  background:#1e1e2e;color:#ccc;font-size:13px;cursor:pointer;
-  white-space:nowrap;flex-shrink:0;font-family:inherit;
-}
-.btns button:active{background:#c850c0;color:#fff;border-color:#c850c0}
-.btns button.g{border-color:#4ecdc455;color:#4ecdc4}
-.btns button.p{border-color:#c850c055;color:#ea80fc}
-.btns button.y{border-color:#ffd93d55;color:#ffd93d}
+.chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.chat::-webkit-scrollbar{width:4px}
+.chat::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+
+.msg{max-width:85%;padding:12px 16px;border-radius:12px;font-size:14px;line-height:1.6;word-wrap:break-word;white-space:pre-wrap}
+.msg.user{align-self:flex-end;background:#c850c0;color:#fff;border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:#1e1e2e;color:#ddd;border-bottom-left-radius:4px;border:1px solid #333}
+.msg.ai code{background:#0c0c14;padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace;font-size:13px}
+.msg.ai pre{background:#0c0c14;padding:12px;border-radius:8px;overflow-x:auto;margin:8px 0;font-family:'Fira Code',monospace;font-size:13px;border:1px solid #333}
+.msg.ai pre code{background:none;padding:0}
+.msg.error{align-self:center;background:#ff6b6b22;color:#ff6b6b;border:1px solid #ff6b6b44;font-size:12px}
+.msg.system{align-self:center;background:transparent;color:#666;font-size:12px;text-align:center}
+
+.typing{align-self:flex-start;padding:12px 16px;color:#888;font-size:13px}
+.typing span{animation:blink 1.5s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+
+.input-bar{padding:12px 16px;background:#14141f;border-top:1px solid #252540;display:flex;gap:8px;flex-shrink:0}
+.input-bar textarea{flex:1;background:#1e1e2e;border:1px solid #333;border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:inherit;resize:none;outline:none;min-height:44px;max-height:120px}
+.input-bar textarea:focus{border-color:#c850c0}
+.input-bar textarea::placeholder{color:#666}
+.input-bar button{background:#c850c0;color:#fff;border:none;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;cursor:pointer;flex-shrink:0}
+.input-bar button:hover{background:#a040a0}
+.input-bar button:disabled{background:#333;color:#666;cursor:not-allowed}
 </style>
 </head>
 <body>
 
-<div class="bar">
-  <div class="logo"><span>🥬</span> Kimchi Terminal</div>
-  <div class="dot" id="dot"></div>
+<div class="header">
+  <div class="logo"><span>🥬</span> Kimchi AI</div>
+  <button id="btn-clear">Clear</button>
 </div>
 
-<div id="term"></div>
-
-<div class="btns" id="btns">
-  <button class="g" data-c="run">🥬 Kimchi</button>
-  <button class="y" data-c="yes">Yes</button>
-  <button class="y" data-c="no">No</button>
-  <button class="y" data-c="1">1</button>
-  <button class="y" data-c="2">2</button>
-  <button class="p" data-c="task">💬 Perintah</button>
-  <button class="p" data-c="ferment">🧪 Ferment</button>
-  <button data-c="install">⬇️ Install</button>
-  <button data-c="key">🔑 Key</button>
-  <button data-c="clear">Clear</button>
+<div class="key-bar">
+  <input type="password" id="api-key" placeholder="🔑 API Key dari app.kimchi.dev/settings" autocomplete="off">
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+<div class="chat" id="chat">
+  <div class="msg system">Masukkan API Key di atas, lalu ketik perintah di bawah.</div>
+  <div class="msg system">Daftar: <b>app.kimchi.dev</b> → Settings → API Keys → Create</div>
+</div>
+
+<div class="input-bar">
+  <textarea id="input" placeholder="Ketik perintah... (contoh: buatkan landing page)" rows="1"></textarea>
+  <button id="btn-send">Kirim</button>
+</div>
+
 <script src="app.js"></script>
 </body>
 </html>
