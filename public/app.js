@@ -5,53 +5,74 @@ var btnSend = document.getElementById('btn-send');
 var btnClear = document.getElementById('btn-clear');
 var btnConnect = document.getElementById('btn-connect');
 var apiKeyInput = document.getElementById('api-key');
+var providerSelect = document.getElementById('provider');
+var customUrl = document.getElementById('custom-url');
 var notif = document.getElementById('notif');
 var messages = [];
 var connected = false;
 
-// Load saved key
-var savedKey = localStorage.getItem('kimchi_api_key') || '';
-if (savedKey) {
-  apiKeyInput.value = savedKey;
-  testConnection(savedKey, true);
+var PROVIDERS = {
+  kimchi: { url: 'https://api.kimchi.dev/v1', model: 'kimchi-coder-v2' },
+  openai: { url: 'https://api.openai.com/v1', model: 'gpt-4o-mini' },
+  openrouter: { url: 'https://openrouter.ai/api/v1', model: 'moonshotai/kimi-dev-72b:free' },
+  custom: { url: '', model: 'gpt-4o-mini' }
+};
+
+// Load saved settings
+var saved = JSON.parse(localStorage.getItem('kimchi_settings') || '{}');
+if (saved.provider) providerSelect.value = saved.provider;
+if (saved.key) apiKeyInput.value = saved.key;
+if (saved.customUrl) customUrl.value = saved.customUrl;
+toggleCustom();
+
+providerSelect.addEventListener('change', toggleCustom);
+function toggleCustom() {
+  customUrl.style.display = providerSelect.value === 'custom' ? '' : 'none';
 }
 
-// Connect button
-btnConnect.addEventListener('click', function() {
-  var key = apiKeyInput.value.trim();
-  if (!key) { showNotif('fail', '❌ Masukkan API Key dulu!'); return; }
-  testConnection(key, false);
-});
+btnConnect.addEventListener('click', testConnection);
 
-// Test connection
-async function testConnection(key, silent) {
+async function testConnection() {
+  var key = apiKeyInput.value.trim();
+  if (!key) { showNotif('fail', '❌ Masukkan API Key!'); return; }
+
+  var prov = providerSelect.value;
+  var baseUrl = prov === 'custom' ? customUrl.value.trim() : PROVIDERS[prov].url;
+  var model = PROVIDERS[prov].model;
+
+  if (!baseUrl) { showNotif('fail', '❌ Masukkan Base URL!'); return; }
+
   btnConnect.disabled = true;
   btnConnect.textContent = 'Testing...';
+
   try {
-    var res = await fetch('/api/test', {
+    var res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ apiKey: key })
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: 'hi' }],
+        apiKey: key,
+        baseUrl: baseUrl,
+        model: model
+      })
     });
-    var data = await res.json();
 
-    // Check if any endpoint returned 200
-    var success = data.results && data.results.find(function(r) { return r.status === 200; });
-
-    if (success) {
+    if (res.ok) {
       connected = true;
-      localStorage.setItem('kimchi_api_key', key);
-      showNotif('success', '✅ Terkoneksi! Endpoint: ' + success.url.split('/')[2]);
+      localStorage.setItem('kimchi_settings', JSON.stringify({
+        provider: prov, key: key, customUrl: customUrl.value.trim()
+      }));
+      showNotif('success', '✅ Berhasil terkoneksi! Provider: ' + prov);
       btnConnect.textContent = '✓ OK';
     } else {
       connected = false;
-      var info = data.results ? data.results.map(function(r){ return r.status; }).join(', ') : 'unknown';
-      if (!silent) showNotif('fail', '❌ Gagal. Status: ' + info + '. Cek API key.');
+      var err = await res.json().catch(function(){ return {error:'Error'}; });
+      showNotif('fail', '❌ Gagal: ' + (err.error || '').slice(0, 100));
       btnConnect.textContent = 'Koneksi';
     }
   } catch(e) {
     connected = false;
-    if (!silent) showNotif('fail', '❌ Error: ' + e.message);
+    showNotif('fail', '❌ Error: ' + e.message);
     btnConnect.textContent = 'Koneksi';
   }
   btnConnect.disabled = false;
@@ -60,20 +81,16 @@ async function testConnection(key, silent) {
 function showNotif(type, msg) {
   notif.className = 'notif ' + type;
   notif.textContent = msg;
-  setTimeout(function() { notif.className = 'notif'; }, 5000);
+  setTimeout(function() { notif.className = 'notif'; }, 6000);
 }
 
-// Auto-resize textarea
 input.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
-
-// Enter to send
 input.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
-
 btnSend.addEventListener('click', send);
 btnClear.addEventListener('click', function() {
   messages = [];
@@ -83,14 +100,13 @@ btnClear.addEventListener('click', function() {
 function addMsg(role, text) {
   var div = document.createElement('div');
   div.className = 'msg ' + role;
-  if (role === 'ai') div.innerHTML = formatCode(text);
-  else if (role === 'error') div.textContent = text;
+  if (role === 'ai') div.innerHTML = fmt(text);
   else div.textContent = text;
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
 }
 
-function formatCode(text) {
+function fmt(text) {
   var s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   s = s.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -101,17 +117,18 @@ function formatCode(text) {
 async function send() {
   var text = input.value.trim();
   if (!text) return;
+  if (!connected) { showNotif('fail', '❌ Tekan Koneksi dulu!'); return; }
 
+  var prov = providerSelect.value;
   var key = apiKeyInput.value.trim();
-  if (!key) { showNotif('fail', '❌ Masukkan API Key dan tekan Koneksi dulu!'); return; }
-  if (!connected) { showNotif('fail', '❌ Tekan tombol Koneksi dulu!'); return; }
+  var baseUrl = prov === 'custom' ? customUrl.value.trim() : PROVIDERS[prov].url;
+  var model = PROVIDERS[prov].model;
 
   addMsg('user', text);
   messages.push({ role: 'user', content: text });
   input.value = ''; input.style.height = 'auto';
   btnSend.disabled = true;
 
-  // Typing indicator
   var typing = document.createElement('div');
   typing.className = 'typing'; typing.id = 'typing';
   typing.innerHTML = '<span>●</span><span>●</span><span>●</span>';
@@ -121,29 +138,24 @@ async function send() {
     var res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: messages, apiKey: key })
+      body: JSON.stringify({ messages: messages, apiKey: key, baseUrl: baseUrl, model: model })
     });
     var t = document.getElementById('typing'); if (t) t.remove();
 
     if (!res.ok) {
-      var errData = await res.json().catch(function(){ return {error:'Error '+res.status}; });
-      addMsg('error', '⚠️ ' + (errData.error || 'Request failed'));
+      var errData = await res.json().catch(function(){ return {error:'Error'}; });
+      addMsg('error', '⚠️ ' + (errData.error || '').slice(0, 200));
       btnSend.disabled = false; return;
     }
 
     var data = await res.json();
     var reply = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-    if (reply) {
-      messages.push({ role: 'assistant', content: reply });
-      addMsg('ai', reply);
-    } else {
-      addMsg('error', '⚠️ Empty response');
-    }
+    if (reply) { messages.push({ role: 'assistant', content: reply }); addMsg('ai', reply); }
+    else addMsg('error', '⚠️ No response');
   } catch(e) {
     var t2 = document.getElementById('typing'); if (t2) t2.remove();
     addMsg('error', '⚠️ ' + e.message);
   }
-  btnSend.disabled = false;
-  input.focus();
+  btnSend.disabled = false; input.focus();
 }
 })();
