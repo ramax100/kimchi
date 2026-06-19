@@ -37,7 +37,7 @@ document.getElementById('btns').addEventListener('click',function(e){
     case'task':var t=prompt('Perintah:');if(t)send(t+'\r');break;
     case'ferment':var f=prompt('Tugas:');if(f)send('/ferment '+f+'\r');break;
     case'key':var k=prompt('API Key:');if(k)send('export KIMCHI_API_KEY="'+k.trim()+'"\r');break;
-    case'install':send('curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash\r');break;
+    case'install':send('which kimchi && kimchi --version\r');break;
     case'clear':term.clear();break;
   }
 });

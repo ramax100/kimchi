@@ -1,9 +1,8 @@
 {
   "name": "kimchi-terminal",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "scripts": {
-    "start": "node server.js",
-    "postinstall": "bash install-kimchi.sh || true"
+    "start": "node server.js"
   },
   "engines": { "node": ">=18" },
   "dependencies": {
