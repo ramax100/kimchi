@@ -26,27 +26,32 @@ btnConnect.addEventListener('click', function() {
 // Test connection
 async function testConnection(key, silent) {
   btnConnect.disabled = true;
-  btnConnect.textContent = '...';
+  btnConnect.textContent = 'Testing...';
   try {
-    var res = await fetch('/api/chat', {
+    var res = await fetch('/api/test', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ messages: [{ role: 'user', content: 'hi' }], apiKey: key })
+      body: JSON.stringify({ apiKey: key })
     });
-    if (res.ok) {
+    var data = await res.json();
+
+    // Check if any endpoint returned 200
+    var success = data.results && data.results.find(function(r) { return r.status === 200; });
+
+    if (success) {
       connected = true;
       localStorage.setItem('kimchi_api_key', key);
-      showNotif('success', '✅ Berhasil terkoneksi ke Kimchi AI!');
+      showNotif('success', '✅ Terkoneksi! Endpoint: ' + success.url.split('/')[2]);
       btnConnect.textContent = '✓ OK';
     } else {
       connected = false;
-      var err = await res.text();
-      if (!silent) showNotif('fail', '❌ Gagal koneksi: API Key tidak valid atau server error');
+      var info = data.results ? data.results.map(function(r){ return r.status; }).join(', ') : 'unknown';
+      if (!silent) showNotif('fail', '❌ Gagal. Status: ' + info + '. Cek API key.');
       btnConnect.textContent = 'Koneksi';
     }
   } catch(e) {
     connected = false;
-    if (!silent) showNotif('fail', '❌ Gagal koneksi: ' + e.message);
+    if (!silent) showNotif('fail', '❌ Error: ' + e.message);
     btnConnect.textContent = 'Koneksi';
   }
   btnConnect.disabled = false;
