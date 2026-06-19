@@ -92,5 +92,33 @@ app.ws('/ws', (ws) => {
   ws.on('close', () => term.kill());
 });
 
+// Debug page - open in browser to see status
+app.get('/debug', (req, res) => {
+  const checks = [];
+  
+  try { checks.push('which kimchi: ' + execSync('which kimchi 2>&1', { env: { PATH: FULL_PATH } }).toString().trim()); }
+  catch(e) { checks.push('which kimchi: NOT FOUND'); }
+  
+  try { checks.push('kimchi --version: ' + execSync(KIMCHI_BIN + ' --version 2>&1').toString().trim()); }
+  catch(e) { checks.push('kimchi --version: FAILED - ' + e.message.split('\n')[0]); }
+  
+  try { checks.push('ls ~/.local/bin/: ' + execSync('ls -la ' + BIN_DIR + ' 2>&1').toString().trim()); }
+  catch(e) { checks.push('ls ~/.local/bin/: ' + e.message.split('\n')[0]); }
+  
+  try { checks.push('ls ~/.kimchi/: ' + execSync('ls -la ' + HOME + '/.kimchi/ 2>&1').toString().trim()); }
+  catch(e) { checks.push('ls ~/.kimchi/: ' + e.message.split('\n')[0]); }
+  
+  try { checks.push('find kimchi: ' + execSync('find ' + HOME + ' -name "kimchi" -type f 2>/dev/null').toString().trim()); }
+  catch(e) { checks.push('find kimchi: none'); }
+  
+  checks.push('PATH: ' + FULL_PATH);
+  checks.push('HOME: ' + HOME);
+  checks.push('KIMCHI_BIN: ' + KIMCHI_BIN);
+  checks.push('exists: ' + fs.existsSync(KIMCHI_BIN));
+
+  res.setHeader('Content-Type', 'text/plain');
+  res.send(checks.join('\n\n'));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => console.log('Running on port ' + PORT));
