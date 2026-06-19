@@ -29,7 +29,7 @@ document.getElementById('btns').addEventListener('click',function(e){
   var b=e.target.closest('button');if(!b)return;
   var c=b.getAttribute('data-c');
   switch(c){
-    case'kimchi':send('kimchi\r');break;
+    case'kimchi':send('/opt/render/.local/bin/kimchi\r');break;
     case'y':send('y\r');break;
     case'n':send('n\r');break;
     case'1':send('1\r');break;

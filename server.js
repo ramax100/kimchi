@@ -78,6 +78,11 @@ app.ws('/ws', (ws) => {
     }
   });
 
+  // Ensure PATH is set in shell session
+  setTimeout(() => {
+    term.write('export PATH="/opt/render/.local/bin:$PATH"\r');
+  }, 500);
+
   term.onData(d => { try { ws.send(d); } catch(e){} });
   term.onExit(() => { try { ws.close(); } catch(e){} });
 
