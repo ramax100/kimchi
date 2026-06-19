@@ -3,6 +3,7 @@ const expressWs = require('express-ws');
 const pty = require('node-pty');
 const path = require('path');
 const os = require('os');
+const fs = require('fs');
 const { execSync } = require('child_process');
 
 const app = express();
@@ -10,31 +11,51 @@ expressWs(app);
 app.use(express.static(path.join(__dirname, 'public')));
 
 const HOME = os.homedir();
-const KIMCHI_PATHS = [
-  HOME + '/.local/bin',
-  HOME + '/.kimchi/bin',
-  HOME + '/.kimchi',
-  '/usr/local/bin'
-];
-const FULL_PATH = KIMCHI_PATHS.join(':') + ':/usr/bin:/bin:' + (process.env.PATH || '');
+const BIN_DIR = HOME + '/.local/bin';
+const KIMCHI_BIN = BIN_DIR + '/kimchi';
+const FULL_PATH = BIN_DIR + ':' + HOME + '/.kimchi/bin:' + HOME + '/.kimchi:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || '');
 
-// Install Kimchi on server start
+// Install Kimchi binary directly
 function installKimchi() {
+  // Skip if already exists
+  if (fs.existsSync(KIMCHI_BIN)) {
+    console.log('Kimchi found at ' + KIMCHI_BIN);
+    return;
+  }
+
+  console.log('Installing Kimchi...');
   try {
-    execSync('which kimchi', { env: { ...process.env, PATH: FULL_PATH } });
-    console.log('Kimchi already installed');
-  } catch {
-    console.log('Installing Kimchi CLI...');
+    // Create bin directory
+    execSync('mkdir -p ' + BIN_DIR);
+
+    // Download via GitHub releases install script
+    execSync(
+      'curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | HOME=' + HOME + ' bash',
+      { env: { ...process.env, HOME, PATH: FULL_PATH }, stdio: 'inherit', timeout: 120000 }
+    );
+  } catch(e) {
+    console.log('Install script failed, trying direct download...');
     try {
-      execSync('curl -fsSL https://github.com/getkimchi/kimchi/releases/latest/download/install.sh | bash', {
-        env: { ...process.env, PATH: FULL_PATH, HOME },
-        stdio: 'inherit',
-        timeout: 120000
-      });
-      console.log('Kimchi installed!');
-    } catch (e) {
-      console.log('Kimchi install failed:', e.message);
+      // Fallback: download tar.gz from SourceForge mirror
+      execSync([
+        'mkdir -p /tmp/kimchi-dl',
+        'curl -fsSL -o /tmp/kimchi-dl/kimchi.tar.gz "https://github.com/getkimchi/kimchi/releases/latest/download/kimchi_linux_amd64.tar.gz"',
+        'tar -xzf /tmp/kimchi-dl/kimchi.tar.gz -C /tmp/kimchi-dl/',
+        'find /tmp/kimchi-dl -name "kimchi" -type f -exec cp {} ' + KIMCHI_BIN + ' \\;',
+        'chmod +x ' + KIMCHI_BIN
+      ].join(' && '), { stdio: 'inherit', timeout: 120000 });
+    } catch(e2) {
+      console.log('Direct download also failed:', e2.message);
+      console.log('User will need to install manually in terminal');
     }
+  }
+
+  // Verify
+  try {
+    const version = execSync(KIMCHI_BIN + ' --version', { env: { PATH: FULL_PATH } }).toString().trim();
+    console.log('Kimchi ready: ' + version);
+  } catch(e) {
+    console.log('Kimchi binary not verified');
   }
 }
 
